@@ -55,11 +55,15 @@ public class AuthController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> logout(Principal principal) {
+    public ResponseEntity<Void> logout(
+            Principal principal,
+            @CookieValue("refreshToken") String refreshToken
+    ) {
 
-        String userEmail = principal.getName();
+        if(principal != null) {
+            authService.logout(refreshToken);
+        }
 
-        authService.logout(userEmail);
         ResponseCookie clearCookie = cookieUtil.clearRefreshTokenCookie();
 
         return ResponseEntity.noContent()
