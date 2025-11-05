@@ -14,7 +14,7 @@ public class CookieUtil {
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
-                .path("/api/auth/refresh")
+                .path("/api/auth")
                 .maxAge(refreshTokenValidityInMs)
                 .sameSite("Lax")
                 .build();

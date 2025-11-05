@@ -27,6 +27,8 @@ public class AuthService {
     //RT redis 에 저장
     public LoginResponseDto login(LoginRequestDto loginRequest) {
 
+        //이미 로그인 된 경우 처리 로직 필요
+
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new NoPermissionException("user", "email not found"));
 
