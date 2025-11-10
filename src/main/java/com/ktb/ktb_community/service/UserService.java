@@ -46,9 +46,9 @@ public class UserService {
         return userRepository.save(user).getUserId();
     }
 
-    public UserResponseDto getUserInfo(String userEmail){
+    public UserResponseDto getUserInfo(String userId){
 
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new NotFoundException("user", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
         return UserResponseDto.from(user);
     }
 
@@ -56,7 +56,9 @@ public class UserService {
     public UserResponseDto updateUser(UserRequestDto userRequestDto, Principal principal) {
 
         //권한 검증
-        if(!Objects.equals(userRequestDto.getEmail(), principal.getName())) {
+        User user = userRepository.findById(Long.valueOf(principal.getName())).orElseThrow(() -> new NotFoundException("user", "not found"));
+
+        if(!Objects.equals(user.getUserId(), Long.valueOf(principal.getName()))) {
             throw new NoPermissionException("user", "no_permission");
         }
 
@@ -67,17 +69,15 @@ public class UserService {
             throw new DuplicatedException("nickname", "duplicated");
         }
 
-        User user =  userRepository.findByEmail(userRequestDto.getEmail()).orElseThrow(() -> new IllegalArgumentException("email not found") );
-
         user.updateUser(userRequestDto.getEmail(), userRequestDto.getNickname(), userRequestDto.getProfileImageUrl());
 
         return UserResponseDto.from(userRepository.save(user));
     }
 
     @Transactional
-    public void deleteUser(String email) {
+    public void deleteUser(String userId) {
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("email not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new IllegalArgumentException("email not found"));
 
         user.softDelete();
     }

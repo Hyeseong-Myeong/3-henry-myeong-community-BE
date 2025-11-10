@@ -51,7 +51,7 @@ public class AuthService {
     public void logout(String refreshToken) {
 
         RefreshToken savedRefreshToken = refreshTokenRepository.findByToken(refreshToken).orElseThrow(
-                () -> new NoPermissionException("accessToken", "invalid or expired token"));
+                () -> new NoPermissionException("refreshToken", "invalid or expired token"));
 
         refreshTokenRepository.delete(savedRefreshToken);
     }

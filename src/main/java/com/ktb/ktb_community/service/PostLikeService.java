@@ -25,12 +25,12 @@ public class PostLikeService {
     private final UserRepository userRepository;
 
     @Transactional
-    public PostLikeResponseDto createLike (Long postId, String userEmail) {
+    public PostLikeResponseDto createLike (Long postId, String userId) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("post", "not found"));
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new NotFoundException("user", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
 
-        Optional<PostLike> optionalPostLike = postLikeRepository.findByPost_PostIdAndUser_email(postId, userEmail);
+        Optional<PostLike> optionalPostLike = postLikeRepository.findByPost_PostIdAndUser_UserId(postId, Long.valueOf(userId));
 
         if(optionalPostLike.isPresent()) {
             throw new DuplicatedException("postLike", "already liked");
@@ -49,12 +49,12 @@ public class PostLikeService {
     }
 
     @Transactional
-    public PostLikeResponseDto deleteLike (Long postId, String userEmail) {
+    public PostLikeResponseDto deleteLike (Long postId, String userId) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("post", "not found"));
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new NotFoundException("user", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
 
-        Optional<PostLike> optionalPostLike = postLikeRepository.findByPost_PostIdAndUser_email(postId, userEmail);
+        Optional<PostLike> optionalPostLike = postLikeRepository.findByPost_PostIdAndUser_UserId(postId, Long.valueOf(userId));
 
         if(optionalPostLike.isEmpty()){
             throw new NotFoundException("postLike", "not found");

@@ -13,7 +13,7 @@ public class CookieUtil {
     public ResponseCookie createRefreshTokenCookie(String refreshToken) {
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .path("/api/auth")
                 .maxAge(refreshTokenValidityInMs)
                 .sameSite("Lax")
@@ -22,8 +22,10 @@ public class CookieUtil {
 
     public ResponseCookie clearRefreshTokenCookie() {
         return ResponseCookie.from("refreshToken", null)
+                .httpOnly(true)
+                .path("/api/auth")
                 .maxAge(0)
-                .path("/")
+                .sameSite("Lax")
                 .build();
     }
 }
