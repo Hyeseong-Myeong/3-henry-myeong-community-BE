@@ -32,9 +32,9 @@ public class CommentService {
     private final PostRepository postRepository;
 
     @Transactional
-    public CommentResponseDto create(CommentRequestDto commentRequestDto, String userEmail, Long postId) {
+    public CommentResponseDto create(CommentRequestDto commentRequestDto, String userId, Long postId) {
 
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new NotFoundException("user", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("post", "not found"));
 
         Comment comment = new Comment(commentRequestDto.getContent(), user, post);
@@ -43,15 +43,15 @@ public class CommentService {
         return CommentResponseDto.from(comment, Boolean.TRUE);
     }
 
-    public CommentResponseDto getCommentById(Long commentId, String userEmail) {
+    public CommentResponseDto getCommentById(Long commentId, String userId) {
 
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("comment", "not found"));
-        Boolean isAuthor = comment.getUser().getEmail().equals(userEmail);
+        Boolean isAuthor = comment.getUser().getUserId().equals(Long.valueOf(userId));
 
         return CommentResponseDto.from(comment, isAuthor);
     }
 
-    public CommentPageResponseDto getCommentsByPostId(Long postId, Integer cursor, int size, String userEmail) {
+    public CommentPageResponseDto getCommentsByPostId(Long postId, Integer cursor, int size, String userId) {
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "commentId"));
 
@@ -64,7 +64,7 @@ public class CommentService {
 
         List<CommentResponseDto> commentResponseDtoList = commentSlice.getContent().stream()
                 .map(comment -> {
-                    Boolean isAuthor = comment.getUser().getEmail().equals(userEmail);
+                    Boolean isAuthor = comment.getUser().getUserId().equals(Long.valueOf(userId));
                     return CommentResponseDto.from(comment, isAuthor);
                 })
                 .toList();
@@ -79,9 +79,9 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponseDto update(CommentRequestDto commentRequestDto, String userEmail, Long commentId) {
+    public CommentResponseDto update(CommentRequestDto commentRequestDto, String userId, Long commentId) {
 
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new NotFoundException("user", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("comment", "not found"));
 
         //댓글 작성자가 아닌 경우 수정 불가
@@ -95,9 +95,9 @@ public class CommentService {
     }
 
     @Transactional
-    public Boolean deleteCommentById(Long commentId, String userEmail){
+    public Boolean deleteCommentById(Long commentId, String userId){
 
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new NotFoundException("user", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("comment", "not found"));
 
         //권한 확인

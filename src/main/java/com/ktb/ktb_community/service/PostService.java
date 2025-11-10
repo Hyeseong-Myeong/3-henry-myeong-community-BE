@@ -33,9 +33,9 @@ public class PostService {
     private final CommentRepository commentRepository;
 
     @Transactional
-    public PostResponseDto create(PostRequestDto requestDto, String email) {
+    public PostResponseDto create(PostRequestDto requestDto, String userId) {
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("user not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new IllegalArgumentException("user not found"));
         List<ImageResponseDto> images = new ArrayList<>();
 
         Post post = Post.builder()
@@ -51,21 +51,21 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto getPostById(Long postId, String email) {
+    public PostResponseDto getPostById(Long postId, String userId) {
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("post not found"));
         Integer likeCount = postLikeRepository.countByPost_PostId(postId);
         List<PostImage> postImageList = postImageRepository.findAllByPost_PostId(postId);
-        Optional<PostLike> optionalPostLike =  postLikeRepository.findByPost_PostIdAndUser_email(postId, email);
-        Boolean isLiked = false;
+        Optional<PostLike> optionalPostLike =  postLikeRepository.findByPost_PostIdAndUser_UserId(postId, Long.valueOf(userId));
+        boolean isLiked = false;
 
-        List<ImageResponseDto> dtos = postImageList.stream()
+        List<ImageResponseDto> dtoList = postImageList.stream()
                 .map(PostImage::getImage)
                 .map(ImageResponseDto::from)
                 .toList();
 
         Boolean isAuthor = Boolean.FALSE;
-        if(post.getUser().getEmail().equals(email)) {
+        if(post.getUser().getUserId().equals(Long.valueOf(userId))) {
             isAuthor = Boolean.TRUE;
         }
         post.incrementViewCount();
@@ -76,7 +76,7 @@ public class PostService {
             isLiked = true;
         }
 
-        return PostResponseDto.from(post, likeCount, isLiked, dtos, isAuthor, commentCount);
+        return PostResponseDto.from(post, likeCount, isLiked, dtoList, isAuthor, commentCount);
     }
 
     public PostPageResponseDto getPosts(Integer cursor, int size){
@@ -108,9 +108,9 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto updatePost(PostRequestDto postRequestDto, Long postId, String email) {
+    public PostResponseDto updatePost(PostRequestDto postRequestDto, Long postId, String userId) {
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("user not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new IllegalArgumentException("user not found"));
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("post not found"));
 
         if(!post.getUser().getEmail().equals(user.getEmail())) {
@@ -123,12 +123,12 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePostById(Long postId, String email) {
+    public void deletePostById(Long postId, String userId) {
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("user not found"));
+        userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new IllegalArgumentException("user not found"));
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("post not found"));
 
-        if(!post.getUser().getEmail().equals(user.getEmail())) {
+        if(!post.getUser().getUserId().equals(Long.valueOf(userId))) {
             throw new NoPermissionException("user", "NoPermission");
         }
 
