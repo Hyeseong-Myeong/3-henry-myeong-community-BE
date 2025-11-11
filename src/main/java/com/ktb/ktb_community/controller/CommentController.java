@@ -5,6 +5,7 @@ import com.ktb.ktb_community.dto.CommentPageResponseDto;
 import com.ktb.ktb_community.dto.CommentRequestDto;
 import com.ktb.ktb_community.dto.CommentResponseDto;
 import com.ktb.ktb_community.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<ApiResponse<CommentResponseDto>> createComment(
             @RequestParam(value = "postid") Long postId,
-            @RequestBody CommentRequestDto commentRequestDto,
+            @RequestBody @Valid CommentRequestDto commentRequestDto,
             Principal principal
     ) {
 
@@ -70,7 +71,7 @@ public class CommentController {
     @PatchMapping("/{commentId}")
     public ResponseEntity<ApiResponse<CommentResponseDto>> updateComment(
             @PathVariable("commentId") Long commentId,
-            @RequestBody CommentRequestDto commentRequestDto,
+            @RequestBody @Valid CommentRequestDto commentRequestDto,
             Principal principal
     ){
 

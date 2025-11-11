@@ -5,6 +5,7 @@ import com.ktb.ktb_community.dto.PostPageResponseDto;
 import com.ktb.ktb_community.dto.PostRequestDto;
 import com.ktb.ktb_community.dto.PostResponseDto;
 import com.ktb.ktb_community.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,10 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<PostResponseDto>> createPost(@RequestBody PostRequestDto postRequestDto, Principal principal) {
+    public ResponseEntity<ApiResponse<PostResponseDto>> createPost(
+            @RequestBody @Valid PostRequestDto postRequestDto,
+            Principal principal
+    ) {
 
         PostResponseDto postResponseDto = postService.create(postRequestDto, principal.getName());
 
@@ -62,7 +66,7 @@ public class PostController {
     @PatchMapping("/{postId}")
     public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(
             @PathVariable("postId") Long postId,
-            @RequestBody PostRequestDto postRequestDto,
+            @RequestBody @Valid PostRequestDto postRequestDto,
             Principal principal
     ) {
 
