@@ -7,6 +7,7 @@ import com.ktb.ktb_community.dto.UserRequestDto;
 import com.ktb.ktb_community.dto.UserResponseDto;
 import com.ktb.ktb_community.exception.DuplicatedException;
 import com.ktb.ktb_community.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createUser(@RequestBody UserRequestDto userRequestDto) {
+    public ResponseEntity<ApiResponse<Long>> createUser(@RequestBody @Valid UserRequestDto userRequestDto) {
 
         Long userId = userService.createUser(userRequestDto);
 
@@ -48,7 +49,7 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponseDto>> updateUser(@RequestBody UserRequestDto userRequestDto,
+    public ResponseEntity<ApiResponse<UserResponseDto>> updateUser(@RequestBody @Valid UserRequestDto userRequestDto,
                                                         Principal principal) {
 
         UserResponseDto userResponseDto =  userService.updateUser(userRequestDto, principal);

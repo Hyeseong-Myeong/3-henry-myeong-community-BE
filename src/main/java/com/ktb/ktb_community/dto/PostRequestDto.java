@@ -1,5 +1,7 @@
 package com.ktb.ktb_community.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -7,10 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PostRequestDto {
 
-    // 공백 안됨
-    // 글자 수 제한
+    @NotBlank
+    @Size(max = 26)
     private String title;
-    // 공백 안됨
-    // 글자 수 제한?
+
+    @NotBlank
     private String content;
 }
