@@ -1,4 +1,4 @@
-package com.ktb.ktb_community.controller;
+package com.ktb.ktb_community.controller.user;
 
 import com.ktb.ktb_community.common.advice.ApiResponse;
 import com.ktb.ktb_community.common.advice.ErrorDetail;
@@ -98,17 +98,5 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
-
-
-
-    @ExceptionHandler(DuplicatedException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicatedException(DuplicatedException ex) {
-
-        ErrorDetail errorDetail = new ErrorDetail(ex.getField(), ex.getReason());
-        ErrorResponse errorResponse = new ErrorResponse("resource_conflict", Collections.singletonList(errorDetail));
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-    }
-
 
 }

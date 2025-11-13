@@ -34,8 +34,8 @@ public class CommentService {
     @Transactional
     public CommentResponseDto create(CommentRequestDto commentRequestDto, String userId, Long postId) {
 
-        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("post", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
 
         Comment comment = new Comment(commentRequestDto.getContent(), user, post);
         commentRepository.save(comment);
@@ -45,7 +45,7 @@ public class CommentService {
 
     public CommentResponseDto getCommentById(Long commentId, String userId) {
 
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("comment", "not found"));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("COMMENT_NOT_FOUND"));
         Boolean isAuthor = comment.getUser().getUserId().equals(Long.valueOf(userId));
 
         return CommentResponseDto.from(comment, isAuthor);
@@ -56,7 +56,7 @@ public class CommentService {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "commentId"));
 
         //post 검증
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("post", "not found"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
 
         Slice<Comment> commentSlice = (cursor == null)
                 ? commentRepository.findByPost_PostIdOrderByCommentIdAsc(postId, pageable)
@@ -81,12 +81,12 @@ public class CommentService {
     @Transactional
     public CommentResponseDto update(CommentRequestDto commentRequestDto, String userId, Long commentId) {
 
-        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("comment", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("USER_NOTFOUND"));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("COMMENT_NOTFOUND"));
 
         //댓글 작성자가 아닌 경우 수정 불가
         if(!user.equals(comment.getUser())) {
-            throw new NoPermissionException("user", "unauthorized");
+            throw new NoPermissionException("NO_PERMISSION");
         }
 
         comment.update(commentRequestDto.getContent());
@@ -97,12 +97,12 @@ public class CommentService {
     @Transactional
     public Boolean deleteCommentById(Long commentId, String userId){
 
-        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("comment", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("COMMENT_NOT_FOUND"));
 
         //권한 확인
         if(!user.equals(comment.getUser())) {
-            throw new NoPermissionException("user", "unauthorized");
+            throw new NoPermissionException("NO_PERMISSION");
         }
 
         commentRepository.delete(comment);

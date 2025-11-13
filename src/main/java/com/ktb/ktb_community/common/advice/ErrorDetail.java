@@ -11,5 +11,4 @@ public class ErrorDetail {
         this.field = field;
         this.reason = reason;
     }
-    // Getters...
 }

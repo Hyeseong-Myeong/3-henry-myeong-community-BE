@@ -1,4 +1,4 @@
-package com.ktb.ktb_community.controller;
+package com.ktb.ktb_community.controller.comment;
 
 import com.ktb.ktb_community.common.advice.ApiResponse;
 import com.ktb.ktb_community.dto.CommentPageResponseDto;
