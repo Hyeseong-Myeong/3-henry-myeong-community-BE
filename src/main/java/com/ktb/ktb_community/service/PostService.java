@@ -6,6 +6,7 @@ import com.ktb.ktb_community.entity.PostImage;
 import com.ktb.ktb_community.entity.PostLike;
 import com.ktb.ktb_community.entity.User;
 import com.ktb.ktb_community.exception.NoPermissionException;
+import com.ktb.ktb_community.exception.NotFoundException;
 import com.ktb.ktb_community.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class PostService {
     @Transactional
     public PostResponseDto create(PostRequestDto requestDto, String userId) {
 
-        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new IllegalArgumentException("user not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
         List<ImageResponseDto> images = new ArrayList<>();
 
         Post post = Post.builder()
@@ -53,7 +54,7 @@ public class PostService {
     @Transactional
     public PostResponseDto getPostById(Long postId, String userId) {
 
-        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("post not found"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
         Integer likeCount = postLikeRepository.countByPost_PostId(postId);
         List<PostImage> postImageList = postImageRepository.findAllByPost_PostId(postId);
         Optional<PostLike> optionalPostLike =  postLikeRepository.findByPost_PostIdAndUser_UserId(postId, Long.valueOf(userId));
@@ -110,11 +111,11 @@ public class PostService {
     @Transactional
     public PostResponseDto updatePost(PostRequestDto postRequestDto, Long postId, String userId) {
 
-        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new IllegalArgumentException("user not found"));
-        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("post not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
 
         if(!post.getUser().getEmail().equals(user.getEmail())) {
-            throw new NoPermissionException("user", "NoPermission");
+            throw new NoPermissionException("NO_PERMISSION");
         }
 
         post.update(postRequestDto.getTitle(), postRequestDto.getContent());
@@ -125,11 +126,11 @@ public class PostService {
     @Transactional
     public void deletePostById(Long postId, String userId) {
 
-        userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new IllegalArgumentException("user not found"));
-        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("post not found"));
+        userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("USER_NOT_FOUND"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("POST_NOT_FOUND"));
 
         if(!post.getUser().getUserId().equals(Long.valueOf(userId))) {
-            throw new NoPermissionException("user", "NoPermission");
+            throw new NoPermissionException("NO_PERMISSION");
         }
 
         postRepository.delete(post);

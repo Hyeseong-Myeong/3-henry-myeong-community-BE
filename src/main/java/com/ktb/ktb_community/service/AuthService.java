@@ -30,10 +30,10 @@ public class AuthService {
         //이미 로그인 된 경우 처리 로직 필요
 
         User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new NoPermissionException("user", "email not found"));
+                .orElseThrow(() -> new NoPermissionException("USER_PERMISSION_NOT_FOUND"));
 
         if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new NoPermissionException("password", "invalid or expired password");
+            throw new NoPermissionException("USER_PERMISSION_NOT_FOUND");
         }
 
         String strUserId = user.getUserId().toString();
@@ -51,7 +51,7 @@ public class AuthService {
     public void logout(String refreshToken) {
 
         RefreshToken savedRefreshToken = refreshTokenRepository.findByToken(refreshToken).orElseThrow(
-                () -> new NoPermissionException("refreshToken", "invalid or expired token"));
+                () -> new NoPermissionException("REFRESH_TOKEN_INVALID"));
 
         refreshTokenRepository.delete(savedRefreshToken);
     }
@@ -59,7 +59,7 @@ public class AuthService {
     public LoginResponseDto reissueAccessToken(String refreshToken) {
 
         RefreshToken token = refreshTokenRepository.findByToken(refreshToken).orElseThrow(
-                () -> new NoPermissionException("refreshToken", "invalid or expired token")
+                () -> new NoPermissionException("REFRESH_TOKEN_INVALID")
         );
 
         String accessToken = jwtProvider.createAccessToken(token.getUserId().toString());

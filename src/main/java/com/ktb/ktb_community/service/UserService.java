@@ -48,7 +48,7 @@ public class UserService {
 
     public UserResponseDto getUserInfo(String userId){
 
-        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("user", "not found"));
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(() -> new NotFoundException("USER_NOTFOUND"));
         return UserResponseDto.from(user);
     }
 
@@ -56,10 +56,10 @@ public class UserService {
     public UserResponseDto updateUser(UserRequestDto userRequestDto, Principal principal) {
 
         //권한 검증
-        User user = userRepository.findById(Long.valueOf(principal.getName())).orElseThrow(() -> new NotFoundException("user", "not found"));
+        User user = userRepository.findById(Long.valueOf(principal.getName())).orElseThrow(() -> new NotFoundException("USER_NOTFOUND"));
 
         if(!Objects.equals(user.getUserId(), Long.valueOf(principal.getName()))) {
-            throw new NoPermissionException("user", "no_permission");
+            throw new NoPermissionException("USER_NO_PERMISSION");
         }
 
         if(userRepository.findByEmail(userRequestDto.getEmail()).isPresent()) {
