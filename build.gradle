@@ -37,6 +37,10 @@ dependencies {
     testImplementation 'org.springframework.batch:spring-batch-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // H2 데이터베이스 (테스트용)
+    testImplementation 'com.h2database:h2'
+
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
