@@ -146,6 +146,6 @@ jobs:
               -p 8080:8080 \
               --name backend-api \
               --restart always \
-              --network backend-net \
+              --network docker_backend-net \
               --env-file /home/${{ secrets.SERVER_USER }}/docker/.env \
               registry.ktbcommunity.cloud/ktb_be:latest
