@@ -147,5 +147,5 @@ jobs:
               --name backend-api \
               --restart always \
               --network backend-net \
-              --env-file /home/${{ secrets.SERVER_USER }}/backend/.env \
+              --env-file /home/${{ secrets.SERVER_USER }}/docker/.env \
               registry.ktbcommunity.cloud/ktb_be:latest
