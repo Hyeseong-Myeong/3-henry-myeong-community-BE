@@ -91,9 +91,9 @@ jobs:
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
           echo "MYSQL_TZ=Asia/Seoul" >> .env
-          echo "SPRING_DATASOURCE_URL=${{ secrets.DB_URL }}" >> .env
-          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER_NAME }}" >> .env
-          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "DB_USER_NAME=${{ secrets.DB_USER_NAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "JWT_KEY=${{ secrets.JWT_KEY }}" >> .env
           echo "AT_MS=${{ secrets.AT_MS }}" >> .env
           echo "RT_MS=${{ secrets.RT_MS }}" >> .env
