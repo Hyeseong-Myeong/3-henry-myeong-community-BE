@@ -21,7 +21,7 @@ services:
 
   # 백엔드 API (Spring Boot)
   backend:
-    image: registry.ktbcommunity.cloud/ktb_be:0.0.0
+    image: registry.ktbcommunity.cloud/ktb_be:latest
     container_name: backend-api
     restart: always
     ports:
