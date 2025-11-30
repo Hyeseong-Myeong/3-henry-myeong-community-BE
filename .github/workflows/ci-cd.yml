@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  # 1. 테스트 및 빌드 검증 (CI)
+  # 테스트 및 빌드 검증 (CI)
   build:
     runs-on: ubuntu-latest
     steps:
@@ -38,7 +38,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
 
-  # 2. 도커 이미지 빌드 및 푸시 (CD)
+  # 도커 이미지 빌드 및 푸시 (CD)
   build-and-push-image:
     needs: build
     runs-on: ubuntu-latest
@@ -67,13 +67,14 @@ jobs:
           platforms: linux/amd64
           tags: registry.ktbcommunity.cloud/ktb_be:latest
 
-  # 3. EC2 배포 (CD) - 프록시 경유
+  # EC2 배포 (CD)
   deploy:
     needs: build-and-push-image
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
+      # .env 파일 생성
       - name: Create .env file
         run: |
           touch .env
@@ -93,59 +94,46 @@ jobs:
           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
 
-      # [수정 1] .env 파일 전송 (Proxy 설정 추가 & 경로 수정)
-      - name: Transfer .env file to EC2 (via Proxy)
+      # 설정 파일 전송 (.env + docker-compose.yml)
+      - name: Transfer config files to EC2 (via Proxy)
         uses: appleboy/scp-action@master
         with:
-          # Target Host (EC2 C - Private IP)
+          # Target Host (EC2 C)
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # Proxy Host (EC2 A - Public IP)
+          # Proxy Host (EC2 A)
           proxy_host: ${{ secrets.PROXY_HOST }}
           proxy_username: ${{ secrets.PROXY_USER }}
           proxy_key: ${{ secrets.PROXY_KEY }}
 
-          source: ".env"
+          source: ".env,docker-compose.yml"
           target: "/home/${{ secrets.SERVER_USER }}/docker"
 
-      # [수정 2] 배포 스크립트 실행 (Proxy 설정 추가)
-      - name: Deploy to EC2 (via Proxy)
+      # Docker Compose 실행
+      - name: Deploy with Docker Compose (via Proxy)
         uses: appleboy/ssh-action@master
         with:
-          # Target Host (EC2 C - Private IP)
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # Proxy Host (EC2 A - Public IP)
           proxy_host: ${{ secrets.PROXY_HOST }}
           proxy_username: ${{ secrets.PROXY_USER }}
           proxy_key: ${{ secrets.PROXY_KEY }}
 
           script: |
-            # 폴더가 없을 경우를 대비해 생성
-            mkdir -p /home/${{ secrets.SERVER_USER }}/backend
-
-            # 1. 레지스트리 로그인
+            # 프로젝트 폴더로 이동 (없으면 생성)
+            mkdir -p /home/${{ secrets.SERVER_USER }}/docker
+            cd /home/${{ secrets.SERVER_USER }}/docker
+            
+            # 레지스트리 로그인
             echo ${{ secrets.PORTAINER_REGISTRY_PASSWORD }} | docker login registry.ktbcommunity.cloud -u ${{ secrets.PORTAINER_REGISTRY_USER }} --password-stdin
             
-            # 2. 최신 이미지 Pull
-            docker pull registry.ktbcommunity.cloud/ktb_be:latest
+            # 최신 이미지 Pull (docker-compose.yml 내용을 보고 당겨옴)
+            docker-compose pull
             
-            # 3. 기존 컨테이너 중지 및 삭제
-            if [ $(docker ps -q -f name=backend-api) ]; then
-              docker stop backend-api
-            fi
-            if [ $(docker ps -a -q -f name=backend-api) ]; then
-              docker rm backend-api
-            fi
-
-            # 4. 새 컨테이너 실행
-            # --network: docker-compose로 띄운 DB와 통신하기 위해 필수 (네트워크 이름 확인 필요)
-            docker run -d \
-              -p 8080:8080 \
-              --name backend-api \
-              --restart always \
-              --network docker_backend-net \
-              --env-file /home/${{ secrets.SERVER_USER }}/docker/.env \
-              registry.ktbcommunity.cloud/ktb_be:latest
+            # 컨테이너 실행 (변경된 설정이나 이미지가 있으면 알아서 재생성)
+            docker-compose up -d
+            
+            # 불필요한 이미지 정리
+            docker image prune -f
