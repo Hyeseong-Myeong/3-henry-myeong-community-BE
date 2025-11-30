@@ -1,18 +1,19 @@
-# build stage
+# Build Stage
 FROM gradle:8.11.1-jdk21 AS builder
 WORKDIR /app
+
+COPY build.gradle settings.gradle ./
+RUN ./gradlew dependencies --no-daemon
+
 COPY . .
+RUN ./gradlew build -x test --no-daemon
 
-RUN ./gradlew build -x test
-
-RUN find build/libs -name "*SNAPSHOT.jar" ! -name "*plain.jar" -exec cp {} app.jar \;
-
-# Deploy stage
+# Deploy Stage
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-COPY --from=builder /app/app.jar app.jar
+COPY --from=builder /app/build/libs/app.jar /app/app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
