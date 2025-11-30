@@ -35,8 +35,13 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      # 테스트 실행
+      - name: Run Tests
+        run: ./gradlew test --no-daemon
+
+      #빌드 단계
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build -x test --no-daemon
 
   # 도커 이미지 빌드 및 푸시 (CD)
   build-and-push-image:
@@ -74,6 +79,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       # .env 파일 생성
       - name: Create .env file
         run: |
@@ -93,6 +101,8 @@ jobs:
           echo "AWS_BUCKET_REGION=${{ secrets.AWS_BUCKET_REGION }}" >> .env
           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env
           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> .env
+#          Redis Host
+#          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
 
       # 설정 파일 전송 (.env + docker-compose.yml)
       - name: Transfer config files to EC2 (via Proxy)
