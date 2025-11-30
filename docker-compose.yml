@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # 데이터베이스 (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: backend-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: ${MYSQL_TZ}
+    command:
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./db_data:/var/lib/mysql
+    networks:
+      - backend-net
+
+  # 백엔드 API (Spring Boot)
+  backend:
+    image: registry.ktbcommunity.cloud/ktb_be:0.0.0
+    container_name: backend-api
+    restart: always
+    ports:
+      - "8080:8080"
+
+    env_file:
+      - .env
+
+    environment:
+      # Redis 설정
+      SPRING_DATA_REDIS_HOST: localhost
+      SPRING_DATA_REDIS_PORT: 6379
+      # SPRING_DATA_REDIS_PASSWORD: ...
+
+    depends_on:
+      - db
+    networks:
+      - backend-net
+
+networks:
+  backend-net:
+    driver: bridge
